@@ -31,7 +31,7 @@ A lightweight DietPi installation image tailored for the Orange Pi RV single-boa
 
 * Orange Pi RV board
 * MicroSD card (8 GB or larger recommended, Class 10 / A1 or faster)
-* USB microSD card reader
+* Nvme is recommended.
 * 5V USB-C power supply (at least 3A recommended)
 * Ethernet cable connected to your local network (for headless setup)
 
