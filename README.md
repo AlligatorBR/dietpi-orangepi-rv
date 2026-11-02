@@ -1,4 +1,4 @@
-# DietPi for Orange Pi RV (StarFive JH7110 / RISC-V)
+# DietPi for Orange Pi RV 1st generation (StarFive JH7110 / RISC-V)
 
 A lightweight DietPi installation image tailored for the Orange Pi RV single-board computer, built on a minimal Debian 13 (Trixie) base with board-specific kernel support.
 
