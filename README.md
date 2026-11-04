@@ -85,6 +85,15 @@ A lightweight DietPi installation image tailored for the Orange Pi RV single-boa
 
 ---
 
+## Troubleshooting & Storage Expansion
+
+The image includes an automated first-boot service that expands the partition and filesystem to match your storage media. If your root filesystem still shows around `1.4 GiB` after logging in (`df -h /`), you can manually trigger the expansion:
+
+```bash
+sudo /usr/local/bin/growpart /dev/mmcblk1 2
+sudo resize2fs /dev/mmcblk1p2
+```
+
 ## Important Hardware & Kernel Notes
 
 * **Do not unhold the kernel packages:**
