@@ -4,6 +4,21 @@ A lightweight DietPi installation image tailored for the Orange Pi RV single-boa
 
 ---
 
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="images/dietpi-terminal.png" alt="DietPi Terminal Banner" style="max-width:100%;"><br />
+      <sub><b>DietPi v10.x running on Orange Pi RV 1st gen (SSH session)</b></sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="images/orangepi-board.jpg" alt="Orange Pi RV Board" style="max-width:100%;"><br />
+      <sub><b>Orange Pi RV 1st gen inside a 3D printed case</b></sub>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## Overview
 
 * **Board:** Orange Pi RV
@@ -31,7 +46,7 @@ A lightweight DietPi installation image tailored for the Orange Pi RV single-boa
 
 * Orange Pi RV board
 * MicroSD card (8 GB or larger recommended, Class 10 / A1 or faster)
-* Nvme is recommended.
+* NVMe SSD is supported and recommended for heavy storage workloads
 * 5V USB-C power supply (at least 3A recommended)
 * Ethernet cable connected to your local network (for headless setup)
 
