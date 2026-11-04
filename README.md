@@ -94,6 +94,13 @@ sudo /usr/local/bin/growpart /dev/mmcblk1 2
 sudo resize2fs /dev/mmcblk1p2
 ```
 
+Verify the expanded capacity:
+```bash
+df -h /
+```
+
+---
+
 ## Important Hardware & Kernel Notes
 
 * **Do not unhold the kernel packages:**
