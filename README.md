@@ -24,7 +24,7 @@ A lightweight DietPi installation image tailored for the Orange Pi RV single-boa
 * **Board:** Orange Pi RV
 * **SoC / Architecture:** StarFive JH7110 (4x SiFive U74 @ 1.5 GHz, `riscv64` / RV64GC)
 * **OS Base:** Debian 13 (Trixie) minimal with DietPi
-* **Kernel:** `5.15.0-starfive2` (held with `apt-mark hold` to protect bootloader and hardware support)
+* **Kernel:** `5.15.0-starfive2` (held with `apt-mark hold` to protect bootloader, GPU HDMI clocks, and peripheral device-tree bindings)
 * **Footprint:** ~0.8 GiB disk usage out of the box, around 110 MiB idle RAM usage
 
 ---
@@ -88,7 +88,7 @@ A lightweight DietPi installation image tailored for the Orange Pi RV single-boa
 
 3. **Find the IP address:**
    * Check your router's DHCP client list for a device named `DietPi` or look for its MAC address.
-   * If you have an HDMI monitor attached, the IP address is displayed directly in the top-left corner of the console screen.
+   * If you have an HDMI monitor attached, the IP address is displayed directly in the console screen.
 
 4. **Connect via SSH:**
    * Open a terminal on your computer and connect:
@@ -97,6 +97,50 @@ A lightweight DietPi installation image tailored for the Orange Pi RV single-boa
      ```
    * Accept the host fingerprint when prompted (`yes`) and enter the default password: `dietpi`.
    * Follow the DietPi first-run wizard on screen to set your new passwords and system preferences.
+
+---
+
+## Security Hardening & CVE Mitigations (Without Kernel Recompilation)
+
+Due to vendor-specific HDMI pixel clocking, device tree bindings (DTB), and U-Boot memory layouts, custom kernel recompilations can easily destabilize video output and display timings. Fortunately, known kernel vulnerabilities can be effectively mitigated directly from userspace without modifying or replacing the factory BSP kernel:
+
+### 1. Disable RxRPC Protocol (Fragnesia / Dirty Frag Mitigations)
+The RxRPC network protocol family contains legacy fragmentation handling code that is unnecessary for general SBC operations. Prevent the module from ever being loaded into memory:
+
+```bash
+echo "blacklist rxrpc" | sudo tee /etc/modprobe.d/blacklist-rxrpc.conf
+echo "install rxrpc /bin/true" | sudo tee -a /etc/modprobe.d/blacklist-rxrpc.conf
+```
+
+Verify that the module is not loaded:
+```bash
+lsmod | grep rxrpc
+```
+
+### 2. Restrict Unprivileged Socket Interfaces & Namespaces (Copy Fail Mitigation)
+Vulnerabilities targeting exposed kernel crypto interfaces (`CONFIG_CRYPTO_USER_API_*`) typically require unprivileged users to create network namespaces or bind arbitrary netlink sockets:
+
+```bash
+sudo tee /etc/sysctl.d/99-security-hardening.conf << 'EOF'
+# Restrict unprivileged user namespace creation (cuts off common exploit chains)
+kernel.unprivileged_userns_clone = 0
+
+# Restrict dmesg inspection to root
+kernel.dmesg_restrict = 1
+
+# Disable TCP request socket migration if not explicitly needed
+net.ipv4.tcp_migrate_req = 0
+EOF
+
+sudo sysctl --system
+```
+
+### 3. Mitigating TCP Race Conditions (CVE-2026-98432)
+* **NAT / Firewall Protection:** The TCP option handling race condition occurs on unacknowledged SYN-ACK handshakes under rapid concurrent retransmissions. Operating the board behind standard NAT routers or using `nftables`/`iptables` to drop invalid TCP connection states effectively shields the network stack:
+  ```bash
+  sudo iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+  ```
+* **Headless Deployment:** If running node relays (like Tor Snowflake) or internal network microservices, keeping the stock kernel with the hardening rules above ensures maximum hardware stability while removing the attack surface.
 
 ---
 
@@ -124,7 +168,7 @@ df -h /
   * You can safely run `apt update` and `apt upgrade` for regular system packages.
 
 * **Cooling:**
-  * The JH7110 SoC runs warm (typically 55 °C to 65 °C at idle). A passive heatsink and a 5V fan are strongly recommended for sustained workloads.
+  * The JH7110 SoC runs warm (typically 45 °C to 65 °C depending on ambient temperature and workload). A passive heatsink and a 5V fan are strongly recommended for sustained multi-core tasks.
 
 * **Software management:**
   * Use the built-in `dietpi-software` tool anytime to install lightweight packages (Docker, Pi-hole, web servers, databases, etc.) optimized for your setup.
